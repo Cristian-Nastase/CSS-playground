@@ -1,6 +1,7 @@
 #include <iostream>
 #include <map>
 #include <vector>
+#include <cstring>
 
 class Box {
 private:
@@ -137,7 +138,7 @@ std::ostream& operator<<(std::ostream& out, const Box& obj) {
 class Color {
 private:
     static const std::map<char, char*> colorMap;
-    static const char* endString;
+    static char* endString;
     char currentColor;
     bool active;
 public:
@@ -153,10 +154,8 @@ public:
     void printColored(const char* text) const;
 };
 
-Color::Color() {
-    colorMap.insert({"R", "Dsalut"});
-
-    currentColor = "W";
+Color::Color() {;
+    currentColor = 'W';
     active = true;
 }
 
@@ -175,21 +174,114 @@ char Color::getCurrentColor() const {
 }
 
 char* Color::getEndString() const {
-    return this->endString;
+    return endString;
 }
 
 class Element {
 private:
     static int noElements;
     char* text;
-    const char* className;
-    const char* id;
+    char* className;
+    char* id;
     bool isColored;
-    Box& boxModel;
-    Color& color;
-public:
+    const Box* boxModel;
+    const Color* color;
 
+    char* returnEmptyString();
+    char* testEmptyString(char* text);
+public:
+    Element();
+    Element(char* text, char* className, char* id, bool isColored);
+    Element(const Element& obj);
+    Element& operator=(const Element& obj);
+    ~Element();
 };
+
+int Element::noElements = 0;
+
+char* Element::returnEmptyString() {
+    char* p = new char[4];
+    strcpy(p,"N/A");
+
+    return p;
+}
+
+char* Element::testEmptyString(char* text) {
+    if (text == nullptr) {
+        return returnEmptyString();
+    }
+
+    return text;
+}
+
+Element::Element() : boxModel(new Box), color(new Color) {
+    noElements++;
+
+    text = returnEmptyString();
+    className = returnEmptyString();
+    id = returnEmptyString();
+
+    isColored = true;
+}
+
+Element::Element(char* text, char* className, char* id, bool isColored) : boxModel(new Box), color(new Color) {
+    noElements++;
+
+    this->text = testEmptyString(text);
+    this->className = testEmptyString(className);
+    this->id = testEmptyString(id);
+
+    this->isColored = isColored;
+}
+
+Element::Element(const Element& obj) : boxModel(new Box), color(new Color) {
+    noElements++;
+
+    this->text = new char[strlen(obj.text)];
+    strcpy(this->text, obj.text);
+
+    this->className = new char[strlen(obj.className)];
+    strcpy(this->className, obj.className);
+
+    this->id = new char[strlen(obj.id)];
+    strcpy(this->id, obj.id);
+
+    this->isColored = obj.isColored;
+}
+
+Element& Element::operator=(const Element& obj) {
+    if (this == &obj) {
+        return *this;
+    }
+
+    delete[] this->className;
+    this->className = new char[strlen(obj.className)];
+    strcpy(this->className, obj.className);
+
+    delete[] this->id;
+    this->id = new char[strlen(obj.id)];
+    strcpy(this->id, obj.id);
+
+    delete[] this->text;
+    this->text = new char[strlen(obj.text)];
+    strcpy(this->text, obj.text);
+
+    this->isColored = obj.isColored;
+
+    delete boxModel;
+    this->boxModel = obj.boxModel;
+
+    delete color;
+    this->color = obj.color;
+}
+
+Element::~Element() {
+    delete boxModel;
+    delete color;
+    delete[] className;
+    delete[] id;
+    delete[] text;
+}
 
 class Selector {
     private:
