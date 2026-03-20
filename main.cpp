@@ -3,139 +3,7 @@
 #include <vector>
 #include <cstring>
 
-// box class
-
-class Box {
-private:
-    float* padding;
-    float* margin;
-    float border;
-
-    float* returnVector(float value);
-public:
-    Box();
-    Box(float* padding, float* margin, float border);
-    Box(const Box &obj);
-    Box& operator=(const Box &obj);
-    ~Box();
-
-    friend std::istream& operator>>(std::istream& in, Box& obj);
-    friend std::ostream& operator<<(std::ostream& out, const Box& obj);
-};
-
-float* Box::returnVector(float value) {
-    float* vector = new float[4];
-
-    for (int i = 0; i < 4; i++) {
-        vector[i] = value;
-    }
-
-    return vector;
-}
-
-Box::Box() {
-    padding = returnVector(1.0);
-    margin = returnVector(1.0);
-    border = 1.0;
-}
-
-Box::Box(float* padding, float* margin, float border) {
-    this->padding = returnVector(1.0);
-    for (int i = 0; i < 4; i++) {
-        this->padding[i] = padding[i];
-    }
-
-    this->margin = returnVector(1.0);
-    for (int i = 0; i < 4; i++) {
-        this->margin[i] = margin[i];
-    }
-
-    this->border = border;
-}
-
-Box::Box(const Box &obj) {
-    this->padding = returnVector(1.0);
-    for (int i = 0; i < 4; i++) {
-        this->padding[i] = obj.padding[i];
-    }
-
-    this->margin = returnVector(1.0);
-    for (int i = 0; i < 4; i++) {
-        this->margin[i] = obj.margin[i];
-    }
-
-    this->border = obj.border;
-}
-
-Box& Box::operator=(const Box &obj) {
-    if (this == &obj) {
-        return *this;
-    }
-
-    for (int i = 0; i < 4; i++) {
-        this->padding[i] = obj.padding[i];
-    }
-
-    for (int i = 0; i < 4; i++) {
-        this->margin[i] = obj.margin[i];
-    }
-
-    this->border = obj.border;
-
-    return *this;
-}
-
-Box::~Box() {
-    if (padding != nullptr) {
-        delete[] padding;
-        padding = nullptr;
-    }
-
-    if (margin != nullptr) {
-        delete[] margin;
-        margin = nullptr;
-    }
-}
-
-std::istream& operator>>(std::istream& in, Box& obj) {
-    std::cout<<"Padding (4 values): ";
-    for (int i = 0; i < 4; i++) {
-        in>>obj.padding[i];
-    }
-
-    std::cout<<"Margin (4 values): ";
-    for (int i = 0; i < 4; i++) {
-        in>>obj.margin[i];
-    }
-
-    std::cout<<"Border (1 value): ";
-    in>>obj.border;
-
-    return in;
-}
-
-std::ostream& operator<<(std::ostream& out, const Box& obj) {
-    out<<"Padding: ";
-    for (int i = 0; i < 4; i++) {
-        out<<obj.padding[i]<<" ";
-    }
-
-    out<<"\n";
-
-    out<<"Margin: ";
-    for (int i = 0; i < 4; i++) {
-        out<<obj.margin[i]<<" ";
-    }
-
-    out<<"\n";
-    out<<"Border: "<<obj.border;
-
-    return out;
-}
-
-
 // color class
-
 
 class Color {
 private:
@@ -233,8 +101,256 @@ std::ostream& operator<<(std::ostream& out, const Color& obj) {
     return out;
 }
 
-// element class
+// box class
 
+class Box {
+private:
+    static int noBoxes;
+    int id;
+    int* padding;
+    int* margin;
+    int border;
+
+    int* returnVector(int value);
+    void printMargin(int width, int lines) const;
+    void printBorder(int width, int m_left, int m_right) const;
+    void printPadding(int width, int m_left, int m_right, int lines) const;
+    void printContent(char *text, int m_left, int m_right, int p_left, int p_right) const;
+public:
+    Box();
+    Box(int* padding, int* margin, int border);
+    Box(const Box &obj);
+    Box& operator=(const Box &obj);
+    ~Box();
+
+    friend std::istream& operator>>(std::istream& in, Box& obj);
+    friend std::ostream& operator<<(std::ostream& out, const Box& obj);
+
+    void printBox(char* &text, const Color& obj);
+    int returnTotalWidth(char* text);
+    int returnTotalHeight();
+};
+
+int Box::noBoxes = 0;
+
+int* Box::returnVector(int value) {
+    int* vector = new int[4];
+
+    for (int i = 0; i < 4; i++) {
+        vector[i] = value;
+    }
+
+    return vector;
+}
+
+int Box::returnTotalWidth(char* text) {
+    return padding[1] + margin[1] + padding[3] + margin[3] + strlen(text) + 2 * border;
+}
+
+int Box::returnTotalHeight() {
+    return padding[0] + padding[2] + margin[0] + margin[2] + 1;
+}
+
+Box::Box() : id(noBoxes++) {
+    padding = returnVector(1);
+    margin = returnVector(1);
+    border = 1;
+}
+
+Box::Box(int* padding, int* margin, int border) : id(noBoxes++) {
+    this->padding = returnVector(1);
+    for (int i = 0; i < 4; i++) {
+        this->padding[i] = padding[i];
+    }
+
+    this->margin = returnVector(1);
+    for (int i = 0; i < 4; i++) {
+        this->margin[i] = margin[i];
+    }
+
+    this->border = border;
+}
+
+Box::Box(const Box &obj) : id(noBoxes++) {
+    this->padding = returnVector(1);
+    for (int i = 0; i < 4; i++) {
+        this->padding[i] = obj.padding[i];
+    }
+
+    this->margin = returnVector(1);
+    for (int i = 0; i < 4; i++) {
+        this->margin[i] = obj.margin[i];
+    }
+
+    this->border = obj.border;
+}
+
+Box& Box::operator=(const Box &obj) {
+    if (this == &obj) {
+        return *this;
+    }
+
+    for (int i = 0; i < 4; i++) {
+        this->padding[i] = obj.padding[i];
+    }
+
+    for (int i = 0; i < 4; i++) {
+        this->margin[i] = obj.margin[i];
+    }
+
+    this->border = obj.border;
+
+    return *this;
+}
+
+Box::~Box() {
+    noBoxes--;
+
+    if (padding != nullptr) {
+        delete[] padding;
+        padding = nullptr;
+    }
+
+    if (margin != nullptr) {
+        delete[] margin;
+        margin = nullptr;
+    }
+}
+
+std::istream& operator>>(std::istream& in, Box& obj) {
+    std::cout<<"Padding (4 values -> top, right, bottom, left): ";
+    for (int i = 0; i < 4; i++) {
+        in>>obj.padding[i];
+    }
+
+    std::cout<<"Margin (4 values -> top, right, bottom, left): ";
+    for (int i = 0; i < 4; i++) {
+        in>>obj.margin[i];
+    }
+
+    std::cout<<"Border (1 value): ";
+    in>>obj.border;
+
+    return in;
+}
+
+std::ostream& operator<<(std::ostream& out, const Box& obj) {
+    out<<"Padding: ";
+    for (int i = 0; i < 4; i++) {
+        out<<obj.padding[i]<<" ";
+    }
+
+    out<<"\n";
+
+    out<<"Margin: ";
+    for (int i = 0; i < 4; i++) {
+        out<<obj.margin[i]<<" ";
+    }
+
+    out<<"\n";
+    out<<"Border: "<<obj.border;
+
+    return out;
+}
+
+void Box::printMargin(int width, int lines) const {
+    for (; lines != 0; lines--) {
+        for (int i = 0; i < width; i++) std::cout << " ";
+    }
+
+    std::cout<<"\n";
+}
+
+void Box::printBorder(int contentWidth, int m_left, int m_right) const {
+    int i, j;
+
+    for (i = border; i != 0; i--) {
+        for (j = m_left; j != 0; j--) std::cout<<" ";
+
+        for (j = border; j != 0; j--) std::cout << "|";
+
+        for (j = contentWidth; j != 0; j--) std::cout << "-";
+
+        for (j = border; j != 0; j--) std::cout << "|";
+
+        for (j = m_right; j != 0; j--) std::cout<<" ";
+
+        std::cout<<"\n";
+    }
+}
+
+void Box::printPadding(int contentWidth, int m_left, int m_right, int lines) const {
+    int i, j;
+
+    for (i = lines; i != 0; i--) {
+        for (j = m_left; j != 0; j--) std::cout << " ";
+
+        for (j = border; j != 0; j--) std::cout << "|";
+
+        for (j = contentWidth; j != 0; j--) std::cout << " ";
+
+        for (j = border; j != 0; j--) std::cout << "|";
+
+        for (j = m_right; j != 0; j--) std::cout << " ";
+
+        std::cout<<"\n";
+    }
+}
+
+void Box::printContent(char *text, int m_left, int m_right, int p_left, int p_right) const {
+    int j;
+
+    for (j = m_left; j != 0; j--) std::cout << " ";
+    for (j = border; j != 0; j--) std::cout << "|";
+    for (j = p_left; j != 0; j--) std::cout << " ";
+
+    std::cout << text;
+
+    for (j = p_right; j != 0; j--) std::cout << " ";
+    for (j = border; j != 0; j--) std::cout << "|";
+    for (j = m_right; j != 0; j--) std::cout << " ";
+
+    std::cout<<"\n";
+}
+
+// margin, padding: 0-top 1-right 2-bottom 3-left
+void Box::printBox(char * &text, const Color &obj) {
+    int i, j;
+    int width = this->returnTotalWidth(text);
+
+    int m_top = margin[0];
+    int m_right = margin[1];
+    int m_bottom = margin[2];
+    int m_left = margin[3];
+
+    int p_top = padding[0];
+    int p_right = padding[1];
+    int p_bottom = padding[2];
+    int p_left = padding[3];
+
+    int contentWidth = width - 2 * border - m_left - m_right;
+    system("clear");
+
+    std::cout<<"\n";
+
+    // on top of content
+    printMargin(width, m_top);
+    printBorder(contentWidth, m_left, m_right);
+    printPadding(contentWidth, m_left, m_right, p_top);
+
+    printContent(text, m_left, m_right, p_left, p_right);
+
+
+    // bottom of content
+    printPadding(contentWidth, m_left, m_right, p_bottom);
+    printBorder(contentWidth, m_left, m_right);
+    printMargin(contentWidth, m_bottom);
+
+    std::cout<<"\n";
+}
+
+
+// element class
 
 class Element {
 private:
@@ -258,6 +374,8 @@ public:
 
     friend std::istream& operator>>(std::istream& in, Element& obj);
     friend std::ostream& operator<<(std::ostream& out, const Element& obj);
+
+    void printElement();
 };
 
 int Element::noElements = 0;
@@ -385,6 +503,11 @@ std::ostream &operator<<(std::ostream &out, const Element &obj) {
     return out;
 }
 
+void Element::printElement() {
+
+    this->boxModel->printBox(this->text, *this->color);
+}
+
 // selector class
 
 
@@ -404,7 +527,6 @@ class Selector {
 
 int main() {
     Element e;
-    std::cin>>e;
-    std::cout<<e;
+    e.printElement();
     return 0;
 }
