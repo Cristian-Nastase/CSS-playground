@@ -2,14 +2,19 @@
 #include <map>
 #include <vector>
 #include <cstring>
+#include <limits>
 
 // color class
 
 class Color {
 private:
-    // static const std::map<char, char*> colorMap;
+    static int noColors;
+    static const std::map<char, std::string> colorMap;
     char currentColor;
     bool active;
+    int id;
+
+    static void resetColor();
 public:
     Color();
     Color(char currentColor, bool active);
@@ -22,11 +27,20 @@ public:
 
     char getCurrentColor() const;
     void setCurrentColor(char color);
-    void resetColor();
 
     void printColored(const char* text);
-
 };
+
+const std::map<char, std::string> Color::colorMap = {
+    {'R', "\033[0;31m"},
+    { 'Y', "\033[0;33m"},
+    { 'G', "\033[0;32m"},
+    { 'B', "\033[0;34m"},
+    { 'P', "\033[0;35m"},
+    { 'C', "\033[0;36m"}
+};
+
+int Color::noColors = 0;
 
 void Color::resetColor() {
     std::cout<<"\033[0m";
@@ -36,11 +50,10 @@ void Color::printColored(const char* text) {
     if (!this->active)
         return;
 
-    char key = this->getCurrentColor();
-    // const char* color = colorMap.at(key);
+    std::string color = colorMap.at(this->currentColor);
 
-    // std::cout<<color<<text;
-    this->resetColor();
+    std::cout<<color<<text;
+    resetColor();
 }
 
 char Color::getCurrentColor() const {
@@ -51,17 +64,17 @@ void Color::setCurrentColor(char color) {
     this->currentColor = color;
 }
 
-Color::Color() {;
+Color::Color() : id(noColors++) {;
     currentColor = 'W';
     active = true;
 }
 
-Color::Color(char currentColor, bool active) {
+Color::Color(char currentColor, bool active) : id(noColors++) {
     this->currentColor = currentColor;
     this->active = active;
 }
 
-Color::Color(const Color& obj) {
+Color::Color(const Color& obj) : id(noColors++) {
     this->currentColor = obj.currentColor;
     this->active = obj.active;
 }
@@ -82,15 +95,27 @@ Color::~Color() {
 }
 
 std::istream& operator>>(std::istream& in, Color& obj) {
+    std::vector<char> options;
+    for (auto color: Color::colorMap) {
+        options.push_back(color.first);
+        std::cout<<options.size()<<". "<<color.first<<"\n";
+    }
+
     std::cout<<"Select a color: ";
 
-    int option;
+    unsigned long option;
+    bool valid = false;
 
-    in>>option;
-
-    if (option == 1) {
-        obj.setCurrentColor('R');
+    while (!(in >> option) || option == 0 || option > options.size()) {
+        std::cout << "Not a possible option, try again\n";
+        in.clear();
+        in.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
     }
+
+    char colorChoosed = options[option - 1];
+
+    std::cout<<colorChoosed<<option;
+    obj.setCurrentColor(colorChoosed);
 
     return in;
 }
@@ -101,7 +126,9 @@ std::ostream& operator<<(std::ostream& out, const Color& obj) {
     return out;
 }
 
+
 // box class
+
 
 class Box {
 private:
@@ -112,10 +139,13 @@ private:
     int border;
 
     int* returnVector(int value);
+
+    void readInt(std::istream& in, int& field);
+
     void printMargin(int width, int lines) const;
     void printBorder(int width, int m_left, int m_right) const;
     void printPadding(int width, int m_left, int m_right, int lines) const;
-    void printContent(char *text, int m_left, int m_right, int p_left, int p_right) const;
+    void printContent(char *text, int m_left, int m_right, int p_left, int p_right, Color& color) const;
 public:
     Box();
     Box(int* padding, int* margin, int border);
@@ -126,7 +156,7 @@ public:
     friend std::istream& operator>>(std::istream& in, Box& obj);
     friend std::ostream& operator<<(std::ostream& out, const Box& obj);
 
-    void printBox(char* &text, const Color& obj);
+    void printBox(char* &text, Color& obj);
     int returnTotalWidth(char* text);
     int returnTotalHeight();
 };
@@ -217,19 +247,31 @@ Box::~Box() {
     }
 }
 
+void Box::readInt(std::istream& in, int& field) {
+
+    int temp;
+    while (!(in>>temp)) {
+        std::cout<<"Enter only natural numbers.\n";
+        in.clear();
+        in.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+    }
+
+    field = temp;
+}
+
 std::istream& operator>>(std::istream& in, Box& obj) {
     std::cout<<"Padding (4 values -> top, right, bottom, left): ";
     for (int i = 0; i < 4; i++) {
-        in>>obj.padding[i];
+        obj.readInt(in, obj.padding[i]);
     }
 
     std::cout<<"Margin (4 values -> top, right, bottom, left): ";
     for (int i = 0; i < 4; i++) {
-        in>>obj.margin[i];
+        obj.readInt(in, obj.margin[i]);
     }
 
     std::cout<<"Border (1 value): ";
-    in>>obj.border;
+    obj.readInt(in, obj.border);
 
     return in;
 }
@@ -261,17 +303,13 @@ void Box::printMargin(int width, int lines) const {
     std::cout<<"\n";
 }
 
-void Box::printBorder(int contentWidth, int m_left, int m_right) const {
+void Box::printBorder(int width, int m_left, int m_right) const {
     int i, j;
 
     for (i = border; i != 0; i--) {
         for (j = m_left; j != 0; j--) std::cout<<" ";
 
-        for (j = border; j != 0; j--) std::cout << "|";
-
-        for (j = contentWidth; j != 0; j--) std::cout << "-";
-
-        for (j = border; j != 0; j--) std::cout << "|";
+        for (j = width - m_left - m_right; j != 0; j--) std::cout << "|";
 
         for (j = m_right; j != 0; j--) std::cout<<" ";
 
@@ -297,14 +335,14 @@ void Box::printPadding(int contentWidth, int m_left, int m_right, int lines) con
     }
 }
 
-void Box::printContent(char *text, int m_left, int m_right, int p_left, int p_right) const {
+void Box::printContent(char *text, int m_left, int m_right, int p_left, int p_right, Color& color) const {
     int j;
 
     for (j = m_left; j != 0; j--) std::cout << " ";
     for (j = border; j != 0; j--) std::cout << "|";
     for (j = p_left; j != 0; j--) std::cout << " ";
 
-    std::cout << text;
+    color.printColored(text);
 
     for (j = p_right; j != 0; j--) std::cout << " ";
     for (j = border; j != 0; j--) std::cout << "|";
@@ -314,7 +352,7 @@ void Box::printContent(char *text, int m_left, int m_right, int p_left, int p_ri
 }
 
 // margin, padding: 0-top 1-right 2-bottom 3-left
-void Box::printBox(char * &text, const Color &obj) {
+void Box::printBox(char * &text, Color &obj) {
     int i, j;
     int width = this->returnTotalWidth(text);
 
@@ -334,15 +372,15 @@ void Box::printBox(char * &text, const Color &obj) {
 
     // on top of content
     printMargin(width, m_top);
-    printBorder(contentWidth, m_left, m_right);
+    printBorder(width, m_left, m_right);
     printPadding(contentWidth, m_left, m_right, p_top);
 
-    printContent(text, m_left, m_right, p_left, p_right);
+    printContent(text, m_left, m_right, p_left, p_right, obj);
 
 
     // bottom of content
     printPadding(contentWidth, m_left, m_right, p_bottom);
-    printBorder(contentWidth, m_left, m_right);
+    printBorder(width, m_left, m_right);
     printMargin(width, m_bottom);
 
     std::cout<<"\n";
@@ -351,22 +389,24 @@ void Box::printBox(char * &text, const Color &obj) {
 
 // element class
 
+
 class Element {
 private:
     static int noElements;
     char* text;
     char* className;
-    char* id;
+    char* idName;
     bool isColored;
     Box* boxModel;
     Color* color;
+    int id;
 
     char* returnEmptyString();
     char* testEmptyString(char* text);
     void readString(std::istream& in, std::string text, char*& member);
 public:
     Element();
-    Element(char* text, char* className, char* id, bool isColored);
+    Element(char* text, char* className, char* idName, bool isColored);
     Element(const Element& obj);
     Element& operator=(const Element& obj);
     ~Element();
@@ -396,27 +436,25 @@ char* Element::testEmptyString(char* text) {
     return copy;
 }
 
-Element::Element() : boxModel(new Box), color(new Color) {
-    noElements++;
-
+Element::Element() : boxModel(new Box), color(new Color), id(noElements++) {
     text = returnEmptyString();
     className = returnEmptyString();
-    id = returnEmptyString();
+    idName = returnEmptyString();
 
     isColored = true;
 }
 
-Element::Element(char* text, char* className, char* id, bool isColored) : boxModel(new Box), color(new Color) {
+Element::Element(char* text, char* className, char* idName, bool isColored) : boxModel(new Box), color(new Color), id(noElements++) {
     noElements++;
 
     this->text = testEmptyString(text);
     this->className = testEmptyString(className);
-    this->id = testEmptyString(id);
+    this->idName = testEmptyString(idName);
 
     this->isColored = isColored;
 }
 
-Element::Element(const Element& obj) : boxModel(new Box(*obj.boxModel)), color(new Color(*obj.color)) {
+Element::Element(const Element& obj) : boxModel(new Box(*obj.boxModel)), color(new Color(*obj.color)), id(noElements++) {
     noElements++;
 
     this->text = new char[strlen(obj.text) + 1];
@@ -425,8 +463,8 @@ Element::Element(const Element& obj) : boxModel(new Box(*obj.boxModel)), color(n
     this->className = new char[strlen(obj.className) + 1];
     strcpy(this->className, obj.className);
 
-    this->id = new char[strlen(obj.id) + 1];
-    strcpy(this->id, obj.id);
+    this->idName = new char[strlen(obj.idName) + 1];
+    strcpy(this->idName, obj.idName);
 
     this->isColored = obj.isColored;
 }
@@ -440,9 +478,9 @@ Element& Element::operator=(const Element& obj) {
     this->className = new char[strlen(obj.className) + 1];
     strcpy(this->className, obj.className);
 
-    delete[] this->id;
-    this->id = new char[strlen(obj.id) + 1];
-    strcpy(this->id, obj.id);
+    delete[] this->idName;
+    this->idName = new char[strlen(obj.idName) + 1];
+    strcpy(this->idName, obj.idName);
 
     delete[] this->text;
     this->text = new char[strlen(obj.text) + 1];
@@ -464,14 +502,14 @@ Element::~Element() {
     delete boxModel;
     delete color;
     delete[] className;
-    delete[] id;
+    delete[] idName;
     delete[] text;
 }
 
 void Element::readString(std::istream& in, std::string textToPrint, char*& member) {
     char *buffer = new char[256];
     std::cout<<textToPrint;
-    in>>buffer;
+    std::cin.getline(buffer, 256);
 
     delete[] member;
     member = new char[strlen(buffer) + 1];
@@ -483,7 +521,7 @@ void Element::readString(std::istream& in, std::string textToPrint, char*& membe
 std::istream& operator>>(std::istream& in, Element& obj) {
     obj.readString(in,"Enter a text: ", obj.text);
     obj.readString(in, "Enter a class name: ", obj.className);
-    obj.readString(in, "Enter an id: ", obj.id);
+    obj.readString(in, "Enter an id: ", obj.idName);
 
     in>>*obj.boxModel;
     in>>*obj.color;
@@ -494,7 +532,7 @@ std::istream& operator>>(std::istream& in, Element& obj) {
 std::ostream &operator<<(std::ostream &out, const Element &obj) {
     out<<"Text: "<<obj.text<<"\n";
     out<<"Class Name: "<<obj.className<<"\n";
-    out<<"Id:"<<obj.id<<"\n";
+    out<<"Id:"<<obj.idName<<"\n";
 
     out<<"Box model: "<<*obj.boxModel<<"\n";
     out<<"Color: "<<*obj.color;
@@ -503,9 +541,9 @@ std::ostream &operator<<(std::ostream &out, const Element &obj) {
 }
 
 void Element::printElement() {
-
     this->boxModel->printBox(this->text, *this->color);
 }
+
 
 // selector class
 
@@ -524,8 +562,20 @@ class Selector {
         ~Selector();
 };
 
-int main() {
+Selector::Selector() {
+    selectorString = new char[4];
+    strcpy(selectorString, "N/A");
+
+    type = 'c';
+    isEmpty = true;
+
     Element e;
-    e.printElement();
+    element.push_back(e);
+}
+
+int main() {
+    Element a;
+    std::cin>>a;
+    a.printElement();
     return 0;
 }
