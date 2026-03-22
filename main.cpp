@@ -603,6 +603,14 @@ void Element::printElement() {
     this->boxModel->printBox(this->text, *this->color);
 }
 
+const char *Element::getClassName() const {
+    return this->className;
+}
+
+const char *Element::getIdName() const {
+    return this->idName;
+}
+
 void Element::setClassName(char *string) {
     delete[] this->className;
 
@@ -642,12 +650,16 @@ class Selector {
     private:
         static int noSelector;
         char* selectorString;
-        int type;
+        char type;
         std::vector<Element> elements;
         bool isEmpty;
         int id;
 
         static bool validSelector(char* string);
+
+        bool checkClassName(const Element* element) const;
+        bool checkIdName(const Element* element) const;
+
     public:
         Selector();
         Selector(char* selectorString);
@@ -656,6 +668,7 @@ class Selector {
         ~Selector();
 
         void createElement();
+        void addElement(Element& element);
 
         friend std::istream& operator>>(std::istream& in, Selector& obj);
         friend std::ostream& operator<<(std::ostream& out, const Selector& obj);
@@ -787,6 +800,12 @@ void Selector::verifyType() {
         }
     }
 
+    if (lastChr == '-') {
+        std::cout<<"Element selector, not allowed here, defaults to '*'. \n";
+        this->type = '*';
+        return;
+    }
+
     if (lastChr == '.') {
         this->type = 'C';
     }
@@ -794,6 +813,15 @@ void Selector::verifyType() {
     if (lastChr == '#') {
         this->type = 'I';
     }
+
+    char* copy = new char[strlen(this->selectorString)];
+    strcpy(copy, this->selectorString + 1);
+
+    delete[] this->selectorString;
+    selectorString = new char[strlen(copy) + 1];
+    strcpy(selectorString, copy);
+
+    delete[] copy;
 }
 
 bool Selector::validSelector(char *string) {
@@ -817,34 +845,66 @@ void Selector::createElement() {
     isEmpty = false;
 }
 
+void Selector::addElement(Element& element) {
+    Element copy = element;
+    this->elements.push_back(copy);
+}
+
+bool Selector::checkClassName(const Element *element) const {
+    return strcmp(element->getClassName(), this->selectorString);
+}
+
+bool Selector::checkIdName(const Element *element) const {
+    return strcmp(element->getIdName(), this->selectorString);
+}
+
 std::vector<const Element*> Selector::returnTargetedElements() {
     std::vector<const Element*> targetedElements;
 
-    if (this->type == '*') {
+    if (this->type != '*') {
+        bool (Selector::*condition)(const Element*) const;
+
+        if (this->type == 'I') {
+            condition = &Selector::checkClassName;
+        }
+        else {
+            condition = &Selector::checkIdName;
+        }
+
         for (int i = 0; i < this->elements.size(); i++) {
-            targetedElements.push_back(&this->elements[i]);
+            if (!(this->*condition)(&elements[i]))
+                targetedElements.push_back(&this->elements[i]);
         }
 
         return targetedElements;
     }
 
-    if (this->type == '.') {
-        for (int i = 0; i < this->elements.size(); i++) {
-            if (elements[i].getClassName() == selectorString)
-                targetedElements.push_back(&this->elements[i];
-        }
+    for (int i = 0; i < this->elements.size(); i++) {
+        targetedElements.push_back(&this->elements[i]);
     }
 
-
+    return targetedElements;
 }
 
 int main() {
     Selector s;
     std::cin>>s;
 
-    s.createElement();
+    Element a("slauta", "class", "idName", true);
 
-    std::cout<<s;
+
+    s.addElement(a);
+    s.addElement(a);
+
+    std::vector<const Element*> vector = s.returnTargetedElements();
+    if (vector.empty()) {
+        std::cout<<"No elements found.";
+    }
+    else {
+        for (int i = 0; i < vector.size(); i++) {
+            std::cout<<*vector[i]<<" ";
+        }
+    }
 
     return 0;
 }
