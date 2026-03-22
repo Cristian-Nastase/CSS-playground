@@ -312,7 +312,7 @@ void Box::setTextLength(int textLength) {
 void Box::readInt(std::istream& in, int& field) {
 
     int temp;
-    while (!(in>>temp)) {
+    while (!(in>>temp) || temp < 0) {
         std::cout<<"Enter only natural numbers.\n";
         in.clear();
         in.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
@@ -539,6 +539,8 @@ Element::Element(char* text, char* className, char* idName, bool isColored) : bo
 Element::Element(const Element& obj) : boxModel(new Box(*obj.boxModel)), color(new Color(*obj.color)), id(noElements++) {
     this->text = new char[strlen(obj.text) + 1];
     strcpy(this->text, obj.text);
+
+    if (this->text != nullptr){}
 
     this->className = new char[strlen(obj.className) + 1];
     strcpy(this->className, obj.className);
@@ -773,6 +775,8 @@ Selector::Selector(const Selector &obj) : id(noSelector++) {
     for (int i = 0; i < obj.elements.size(); i++) {
         this->elements.push_back(obj.elements[i]);
     }
+
+    this->isEmpty = false;
 }
 
 Selector& Selector::operator=(const Selector &obj) {
