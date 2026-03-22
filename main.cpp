@@ -862,8 +862,6 @@ std::vector<const Element*> Selector::returnTargetedElements() {
     std::vector<const Element*> targetedElements;
 
     if (this->type != '*') {
-        bool (Selector::*condition)(const Element*) const;
-
         for (int i = 0; i < this->elements.size(); i++) {
             if (this->type == 'C' && checkClassName(&elements[i])) {
                 targetedElements.push_back(&elements[i]);
