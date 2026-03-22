@@ -851,11 +851,11 @@ void Selector::addElement(Element& element) {
 }
 
 bool Selector::checkClassName(const Element *element) const {
-    return strcmp(element->getClassName(), this->selectorString);
+    return !strcmp(element->getClassName(), this->selectorString);
 }
 
 bool Selector::checkIdName(const Element *element) const {
-    return strcmp(element->getIdName(), this->selectorString);
+    return !strcmp(element->getIdName(), this->selectorString);
 }
 
 std::vector<const Element*> Selector::returnTargetedElements() {
@@ -864,16 +864,14 @@ std::vector<const Element*> Selector::returnTargetedElements() {
     if (this->type != '*') {
         bool (Selector::*condition)(const Element*) const;
 
-        if (this->type == 'I') {
-            condition = &Selector::checkClassName;
-        }
-        else {
-            condition = &Selector::checkIdName;
-        }
-
         for (int i = 0; i < this->elements.size(); i++) {
-            if (!(this->*condition)(&elements[i]))
-                targetedElements.push_back(&this->elements[i]);
+            if (this->type == 'C' && checkClassName(&elements[i])) {
+                targetedElements.push_back(&elements[i]);
+            }
+
+            else if (this->type == 'I' && checkIdName(&elements[i])) {
+                targetedElements.push_back(&elements[i]);
+            }
         }
 
         return targetedElements;
