@@ -22,7 +22,7 @@ public:
     Color(char currentColor, float opacity);
     Color(const Color& obj);
     Color& operator=(const Color& obj);
-    ~Color();
+    ~Color() = default;
 
     char getCurrentColor() const;
 
@@ -70,10 +70,6 @@ Color& Color::operator=(const Color& obj) {
     this->opacity = obj.opacity;
 
     return *this;
-}
-
-Color::~Color() {
-    noColors--;
 }
 
 char Color::getCurrentColor() const {
@@ -263,7 +259,6 @@ Box& Box::operator=(const Box &obj) {
 }
 
 Box::~Box() {
-    noBoxes--;
 
     if (padding != nullptr) {
         delete[] padding;
@@ -580,7 +575,6 @@ Element& Element::operator=(const Element& obj) {
 }
 
 Element::~Element() {
-    noElements--;
     delete boxModel;
     delete color;
     delete[] className;
@@ -802,7 +796,6 @@ Selector& Selector::operator=(const Selector &obj) {
 }
 
 Selector::~Selector() {
-    noSelector--;
     delete[] selectorString;
 }
 
@@ -935,19 +928,7 @@ void Selector::addElement(Element& element) {
 }
 
 void Selector::removeElement(int index) {
-    std::vector<Element> copy;
-    for (int i = index + 1; i < this->elements.size(); i++) {
-        copy.push_back(elements[i]);
-    }
-
-    while (elements.size() != index) {
-        elements.pop_back();
-    }
-
-    while (!copy.empty()) {
-        this->elements.push_back(copy[copy.size() - 1]);
-        copy.pop_back();
-    }
+    this->elements.erase(this->elements.begin() + index);
 
     if (elements.empty()) {
         this->isEmpty = true;
