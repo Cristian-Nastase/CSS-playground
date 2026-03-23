@@ -25,6 +25,7 @@ public:
     ~Color() = default;
 
     char getCurrentColor() const;
+    float getOpacity() const;
 
     void setCurrentColor(char color);
 
@@ -74,6 +75,10 @@ Color& Color::operator=(const Color& obj) {
 
 char Color::getCurrentColor() const {
     return this->currentColor;
+}
+
+float Color::getOpacity() const {
+    return this->opacity;
 }
 
 void Color::setCurrentColor(char color) {
@@ -127,11 +132,6 @@ void Color::resetColor() {
 }
 
 void Color::printColored(const char* text) {
-    if (this->opacity < 0.1f) {
-        std::cout<<"Opacity too low to print.";
-        return;
-    }
-
     std::string color = colorMap.at(this->currentColor);
 
     std::cout<<color<<text;
@@ -535,7 +535,9 @@ Element::Element(const Element& obj) : boxModel(new Box(*obj.boxModel)), color(n
     this->text = new char[strlen(obj.text) + 1];
     strcpy(this->text, obj.text);
 
-    if (this->text != nullptr){}
+    if (this->text != nullptr) {
+        boxModel->setTextLength(strlen(this->text));
+    }
 
     this->className = new char[strlen(obj.className) + 1];
     strcpy(this->className, obj.className);
@@ -689,6 +691,10 @@ std::ostream& operator<<(std::ostream &out, const Element &obj) {
 }
 
 void Element::printElement() {
+    if (this->color->getOpacity() < 0.1) {
+        std::cout<<"\nOpacity too low to print for element "<<this->id<<".\n";
+        return;
+    }
     this->boxModel->printBox(this->text, *this->color);
 }
 
