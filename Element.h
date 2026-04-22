@@ -4,6 +4,7 @@
 #include <iostream>
 #include <string>
 #include "Box.h"
+#include "Color.h"
 
 class Element {
 private:
