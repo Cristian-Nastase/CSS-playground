@@ -304,17 +304,7 @@ void Box::setTextLength(int textLength) {
     this->aspectRatio = (double)returnTotalWidth() / returnTotalHeight();
 }
 
-void Box::readInt(std::istream& in, int& field) {
 
-    int temp;
-    while (!(in>>temp) || temp < 0) {
-        std::cout<<"Enter only natural numbers.\n";
-        in.clear();
-        in.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
-    }
-
-    field = temp;
-}
 
 std::istream& operator>>(std::istream& in, Box& obj) {
     std::cout<<"Padding (4 values -> top, right, bottom, left): ";
