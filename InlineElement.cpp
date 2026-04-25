@@ -22,12 +22,12 @@ InlineElement& InlineElement::operator=(const InlineElement &obj) {
 InlineElement::~InlineElement() { }
 
 std::istream& operator>>(std::istream &in, InlineElement &obj) {
-    in>>static_cast<Element&>(obj);
+    in>>(Element&)(obj);
     return  in;
 }
 
 std::ostream &operator<<(std::ostream &out, const InlineElement &obj) {
-    out<<static_cast<const Element&>(obj);
+    out<<(Element&)(obj);
     return  out;
 }
 

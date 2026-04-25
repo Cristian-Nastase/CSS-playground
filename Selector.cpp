@@ -4,6 +4,8 @@
 
 #include "Selector.h"
 
+#include "InlineElement.h"
+
 int Selector::noSelector = 0;
 
 Selector::Selector() : id(noSelector++) {
@@ -32,7 +34,7 @@ Selector::Selector(const Selector &obj) : id(noSelector++) {
     }
 
     for (int i = 0; i < obj.elements.size(); i++) {
-        Element* ptr = new Element(*obj.elements[i]);
+        Element* ptr = obj.elements[i]->clone();
         this->elements.push_back(ptr);
     }
 
@@ -52,7 +54,7 @@ Selector& Selector::operator=(const Selector &obj) {
 
     this->isEmpty = obj.isEmpty;
     for (int i = 0; i < obj.elements.size(); i++) {
-        Element* ptr = new Element(*obj.elements[i]);
+        Element* ptr = obj.elements[i]->clone();
         this->elements.push_back(ptr);
     }
 
@@ -159,7 +161,7 @@ std::ostream& operator<<(std::ostream &out, const Selector &obj) {
 
 void Selector::createElement() {
     std::cout<<"\n[Element "<<this->elements.size() + 1<<"]: \n\n";
-    Element* e = new Element;
+    Element* e = new InlineElement;
     std::cin>>*e;
 
     this->elements.push_back(e);
@@ -174,12 +176,12 @@ void Selector::listElements() const {
 
     for (int i = 0; i < elements.size(); i++) {
         std::cout<<"\n- Element "<<i+1<<"\n";
-        std::cout<<elements[i]<<'\n';
+        std::cout<<*elements[i]<<'\n';
     }
 }
 
 void Selector::addElement(Element* element) {
-    Element* copy = new Element(*element);
+    Element* copy = element->clone();
     this->elements.push_back(copy);
 }
 

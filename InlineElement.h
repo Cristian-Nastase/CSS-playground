@@ -1,5 +1,5 @@
-#ifndef INLINEELEMENT
-#define INLINEELEMENT
+#ifndef INLINEELEMENT_H
+#define INLINEELEMENT_H
 
 #include <iostream>
 #include "Element.h"

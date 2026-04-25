@@ -6,7 +6,7 @@
 int Box::noBoxes = 0;
 
 std::vector<int> Box::returnVector(int value) {
-    return std::vector {value, value, value, value};
+    return std::vector<int>{value, value, value, value};
 }
 
 Box::Box() : id(noBoxes++) {

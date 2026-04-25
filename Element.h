@@ -48,7 +48,7 @@ public:
     void addChild(const Element& obj);
     void removeChild(int index);
 
-    virtual void render() const;
+    virtual void render() const = 0;
     virtual Element* clone() const = 0;
 };
 
