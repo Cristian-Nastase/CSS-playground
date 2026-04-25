@@ -1,96 +1,96 @@
 #include <iostream>
 #include <map>
 #include <vector>
-#include <cstring>
 #include <limits>
 
 #include "Element.h"
 #include "Box.h"
 #include "Color.h"
+#include "InlineElement.h"
 #include "Selector.h"
 
 
-void Box::printBorder(int width, int m_left, int m_right) const {
-    int i, j;
-
-    for (i = border; i != 0; i--) {
-        for (j = m_left; j != 0; j--) std::cout<<" ";
-
-        for (j = width - m_left - m_right; j != 0; j--) std::cout << "|";
-
-        for (j = m_right; j != 0; j--) std::cout<<" ";
-
-        std::cout<<"\n";
-    }
-}
-
-void Box::printPadding(int contentWidth, int m_left, int m_right, int lines) const {
-    int i, j;
-
-    for (i = lines; i != 0; i--) {
-        for (j = m_left; j != 0; j--) std::cout << " ";
-
-        for (j = border; j != 0; j--) std::cout << "|";
-
-        for (j = contentWidth; j != 0; j--) std::cout << " ";
-
-        for (j = border; j != 0; j--) std::cout << "|";
-
-        for (j = m_right; j != 0; j--) std::cout << " ";
-
-        std::cout<<"\n";
-    }
-}
-
-void Box::printContent(char *text, int m_left, int m_right, int p_left, int p_right, Color& color) const {
-    int j;
-
-    for (j = m_left; j != 0; j--) std::cout << " ";
-    for (j = border; j != 0; j--) std::cout << "|";
-    for (j = p_left; j != 0; j--) std::cout << " ";
-
-    color.printColored(text);
-
-    for (j = p_right; j != 0; j--) std::cout << " ";
-    for (j = border; j != 0; j--) std::cout << "|";
-    for (j = m_right; j != 0; j--) std::cout << " ";
-
-    std::cout<<"\n";
-}
-
-// margin, padding: 0-top 1-right 2-bottom 3-left
-void Box::printBox(char * &text, Color &obj) {
-    int i, j;
-    int width = this->returnTotalWidth();
-
-    int m_top = margin[0];
-    int m_right = margin[1];
-    int m_bottom = margin[2];
-    int m_left = margin[3];
-
-    int p_top = padding[0];
-    int p_right = padding[1];
-    int p_bottom = padding[2];
-    int p_left = padding[3];
-
-    int contentWidth = width - 2 * border - m_left - m_right;
-
-    std::cout<<"\n";
-
-    // on top of content
-    printMargin(width, m_top);
-    printBorder(width, m_left, m_right);
-    printPadding(contentWidth, m_left, m_right, p_top);
-
-    printContent(text, m_left, m_right, p_left, p_right, obj);
-
-    // bottom of content
-    printPadding(contentWidth, m_left, m_right, p_bottom);
-    printBorder(width, m_left, m_right);
-    printMargin(width, m_bottom);
-
-    std::cout<<"\n";
-}
+// void Box::printBorder(int width, int m_left, int m_right) const {
+//     int i, j;
+//
+//     for (i = border; i != 0; i--) {
+//         for (j = m_left; j != 0; j--) std::cout<<" ";
+//
+//         for (j = width - m_left - m_right; j != 0; j--) std::cout << "|";
+//
+//         for (j = m_right; j != 0; j--) std::cout<<" ";
+//
+//         std::cout<<"\n";
+//     }
+// }
+//
+// void Box::printPadding(int contentWidth, int m_left, int m_right, int lines) const {
+//     int i, j;
+//
+//     for (i = lines; i != 0; i--) {
+//         for (j = m_left; j != 0; j--) std::cout << " ";
+//
+//         for (j = border; j != 0; j--) std::cout << "|";
+//
+//         for (j = contentWidth; j != 0; j--) std::cout << " ";
+//
+//         for (j = border; j != 0; j--) std::cout << "|";
+//
+//         for (j = m_right; j != 0; j--) std::cout << " ";
+//
+//         std::cout<<"\n";
+//     }
+// }
+//
+// void Box::printContent(char *text, int m_left, int m_right, int p_left, int p_right, Color& color) const {
+//     int j;
+//
+//     for (j = m_left; j != 0; j--) std::cout << " ";
+//     for (j = border; j != 0; j--) std::cout << "|";
+//     for (j = p_left; j != 0; j--) std::cout << " ";
+//
+//     color.printColored(text);
+//
+//     for (j = p_right; j != 0; j--) std::cout << " ";
+//     for (j = border; j != 0; j--) std::cout << "|";
+//     for (j = m_right; j != 0; j--) std::cout << " ";
+//
+//     std::cout<<"\n";
+// }
+//
+// // margin, padding: 0-top 1-right 2-bottom 3-left
+// void Box::printBox(char * &text, Color &obj) {
+//     int i, j;
+//     int width = this->returnTotalWidth();
+//
+//     int m_top = margin[0];
+//     int m_right = margin[1];
+//     int m_bottom = margin[2];
+//     int m_left = margin[3];
+//
+//     int p_top = padding[0];
+//     int p_right = padding[1];
+//     int p_bottom = padding[2];
+//     int p_left = padding[3];
+//
+//     int contentWidth = width - 2 * border - m_left - m_right;
+//
+//     std::cout<<"\n";
+//
+//     // on top of content
+//     printMargin(width, m_top);
+//     printBorder(width, m_left, m_right);
+//     printPadding(contentWidth, m_left, m_right, p_top);
+//
+//     printContent(text, m_left, m_right, p_left, p_right, obj);
+//
+//     // bottom of content
+//     printPadding(contentWidth, m_left, m_right, p_bottom);
+//     printBorder(width, m_left, m_right);
+//     printMargin(width, m_bottom);
+//
+//     std::cout<<"\n";
+// }
 
 // selector class
 
@@ -116,10 +116,10 @@ public:
 };
 
 void Menu::printGoodbye() {
-    Element element("Goodbye!", "", "", true);
+    InlineElement element("Goodbye!", "", "", true);
     Color* color = new Color('R', 1.0);
     element.setColor(color);
-    element.printElement();
+    element.render();
 }
 
 void Menu::run() {

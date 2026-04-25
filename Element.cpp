@@ -15,7 +15,7 @@ Element::Element() : boxModel(new Box), color(new Color), id(noElements++) {
     isColored = true;
 }
 
-std::string Element::checkString(std::string& text) {
+std::string Element::checkString(const std::string& text) {
     if (text.empty()) {
         return "N/A";
     }
@@ -23,14 +23,14 @@ std::string Element::checkString(std::string& text) {
     std::string blockedCharacters = "~!@$%^&*()+=,./';:?><[]{}|`#\\ \"";
 
     for (int i = 0; i < blockedCharacters.length(); i++) {
-        if (text.find(blockedCharacters[i]) == std::string::npos)
+        if (text.find(blockedCharacters[i]) != std::string::npos)
             return "N/A";
     }
 
     return text;
 }
 
-Element::Element(std::string& innerText, std::string& className, std::string& idName, bool isColored) : boxModel(new Box), color(new Color), id(noElements++) {
+Element::Element(const std::string& innerText, const std::string& className, const std::string& idName, bool isColored) : boxModel(new Box), color(new Color), id(noElements++) {
     this->innerText = checkString(innerText);
     this->className = checkString(className);
     this->idName = checkString(idName);
@@ -44,6 +44,10 @@ Element::Element(const Element& obj) : boxModel(new Box(*obj.boxModel)), color(n
     this->idName = obj.idName;
 
     this->isColored = obj.isColored;
+
+    for (int i = 0; i < obj.children.size(); i++) {
+        this->children.push_back(obj.children[i]->clone());
+    }
 }
 
 Element& Element::operator=(const Element& obj) {
@@ -63,10 +67,22 @@ Element& Element::operator=(const Element& obj) {
     delete this->color;
     this->color = new Color(*obj.color);
 
+    for (int i = 0; i < children.size(); i++)
+        delete children[i];
+
+    this->children.clear();
+
+    for (int i = 0; i < obj.children.size(); i++) {
+        this->children.push_back(obj.children[i]->clone());
+    }
+
     return *this;
 }
 
 Element::~Element() {
+    for (int i = 0; i < children.size(); i++)
+        delete children[i];
+
     delete boxModel;
     delete color;
 }
@@ -83,15 +99,15 @@ int Element::getId() const {
     return this->id;
 }
 
-void Element::setClassName(std::string& string) {
+void Element::setClassName(const std::string& string) {
     this->className = checkString(string);
 }
 
-void Element::setIdName(std::string& string) {
+void Element::setIdName(const std::string& string) {
     this->idName = checkString(string);
 }
 
-void Element::setBox(Box* box) {
+void Element::setBox(const Box* box) {
     if (box == nullptr) {
         return;
     }
@@ -100,7 +116,7 @@ void Element::setBox(Box* box) {
     this->boxModel = new Box(*box);
 }
 
-void Element::setColor(Color *color) {
+void Element::setColor(const Color* color) {
     if (color == nullptr) {
         return;
     }
@@ -109,7 +125,7 @@ void Element::setColor(Color *color) {
     this->color = new Color(*color);
 }
 
-std::string Element::readString(std::istream &in, std::string textToPrint) {
+std::string Element::readString(std::istream &in, const std::string& textToPrint) {
     std::string temp;
     std::cout<<textToPrint;
     in>>temp;
@@ -143,4 +159,13 @@ std::ostream& operator<<(std::ostream &out, const Element &obj) {
     out<<"Color: "<<*obj.color;
 
     return out;
+}
+
+void Element::addChild(const Element& obj) {
+    children.push_back(obj.clone());
+}
+
+void Element::removeChild(int index) {
+    delete children[index];
+    children.erase(children.begin() + index);
 }
