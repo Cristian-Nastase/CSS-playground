@@ -3,6 +3,8 @@
 #include <limits>
 #include <vector>
 
+#include "Exceptii.h"
+
 int Box::noBoxes = 0;
 
 std::vector<int> Box::returnVector(int value) {
@@ -21,13 +23,13 @@ Box::Box() : id(noBoxes++) {
 
 Box::Box(const std::vector<int> &padding, const std::vector<int> &margin, int border) : id(noBoxes++) {
     if (padding.size() != 4) {
-        return;
+        throw VectorInvalidException("Padding incorect, prea putine valori");
     }
 
     this->padding = padding;
 
     if (margin.size() != 4) {
-        return;
+        throw VectorInvalidException("Margin incorect, prea putine valori");
     }
 
     this->margin = margin;
@@ -86,15 +88,16 @@ int Box::getHeight() const {
 }
 
 void Box::setPadding(const std::vector<int> &padding) {
-    if (padding.size() != 4)
-        return;
+    if (padding.size() != 4) {
+        throw VectorInvalidException("Padding incorect, prea putine valori");
+    }
 
     this->padding = padding;
 }
 
 void Box::setMargin(const std::vector<int> &margin) {
     if (margin.size() != 4) {
-        return;
+        throw VectorInvalidException("Margin incorect, prea putine valori");
     }
 
     this->margin = margin;

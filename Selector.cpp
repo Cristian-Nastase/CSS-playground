@@ -6,6 +6,9 @@
 
 #include "BlockElement.h"
 #include "InlineElement.h"
+#include <fstream>
+
+#include "Exceptii.h"
 
 int Selector::noSelector = 0;
 
@@ -125,12 +128,16 @@ void Selector::verifyType() {
 }
 
 void Selector::setSelectorString(const std::string& string) {
+    if (string.empty()) {
+        throw TextInvalidException();
+    }
+
     if (!validSelector(string)) {
         std::cout<<"Invalid selector entered, will target all elements as default.";
         this->type = '*';
 
         this->selectorString = "N/A";
-        return;
+
     }
 
     this->selectorString = string;
@@ -161,6 +168,9 @@ std::ostream& operator<<(std::ostream &out, const Selector &obj) {
 }
 
 void Selector::changeSiblings() const {
+    if (!elements.empty())
+        elements.back()->setNextSibling(nullptr);
+
     for (int i = 0; i < elements.size() - 1; i++) {
         elements[i]->setNextSibling(elements[i+1]);
     }
@@ -217,6 +227,8 @@ void Selector::removeElement(int index) {
     if (elements.empty()) {
         this->isEmpty = true;
     }
+
+    changeSiblings();
 }
 
 bool Selector::checkClassName(const Element* element) const {
@@ -259,4 +271,46 @@ void Selector::printElements() const {
     for (int i = 0; i < elements.size(); i++) {
         elements[i]->render();
     }
+
+    for (int i = 0; i < elements.size(); i++) {
+        InlineElement* e = dynamic_cast<InlineElement*>(elements[i]);
+        if (e != nullptr) {
+            e->setRendered(false);
+        }
+    }
+}
+
+void Selector::saveToFile(const std::string& filename) const {
+    std::ofstream file(filename);
+    for (auto* e : elements) {
+        file << e->serialize() << "\n";
+    }
+}
+
+void Selector::loadFromFile(const std::string& filename) {
+    std::ifstream file(filename);
+    if (!file.is_open()) {
+        throw FisierException("No saved session found: " + filename);
+    }
+
+    std::string line;
+
+    while (std::getline(file, line)) {
+        if (line.empty()) continue;
+
+        Element* e;
+        if (line.find("<div") != std::string::npos)
+            e = new BlockElement;
+        else
+            e = new InlineElement;
+
+        try {
+            e->deserialize(line);
+            elements.push_back(e);
+            isEmpty = false;
+        } catch (const std::exception& ex) {
+            delete e;
+        }
+    }
+    changeSiblings();
 }

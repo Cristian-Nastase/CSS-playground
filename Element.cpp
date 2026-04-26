@@ -4,7 +4,7 @@
 #include "Element.h"
 #include "Box.h"
 #include "Color.h"
-
+#include <sstream>
 int Element::noElements = 0;
 
 Element::Element() : boxModel(new Box), color(new Color), id(noElements++) {
@@ -227,4 +227,63 @@ void Element::printContent() const {
     for (j = p_right; j != 0; j--) std::cout << " ";
     for (j = boxModel->getBorder(); j != 0; j--) std::cout << "|";
     for (j = m_right; j != 0; j--) std::cout << " ";
+}
+
+void Element::deserialize(const std::string& data) {
+    size_t pos;
+
+    pos = data.find('>');
+    if (pos == std::string::npos) return;
+    size_t start = pos + 1;
+    size_t end = data.find('<', start);
+    if (end == std::string::npos) return;
+    innerText = data.substr(start, end - start);
+
+    pos = data.find("class=\"");
+    if (pos == std::string::npos) return;
+    start = pos + 7;
+    end = data.find('"', start);
+    if (end == std::string::npos) return;
+    className = data.substr(start, end - start);
+
+    pos = data.find("id=\"");
+    if (pos == std::string::npos) return;
+    start = pos + 4;
+    end = data.find('"', start);
+    if (end == std::string::npos) return;
+    idName = data.substr(start, end - start);
+
+    pos = data.find("padding:");
+    if (pos == std::string::npos) return;
+    start = pos + 8;
+    end = data.find(';', start);
+    if (end == std::string::npos) return;
+    std::istringstream paddingStream(data.substr(start, end - start));
+    std::vector<int> p(4);
+    for (int i = 0; i < 4; i++) paddingStream >> p[i];
+    boxModel->setPadding(p);
+
+    pos = data.find("margin:");
+    if (pos == std::string::npos) return;
+    start = pos + 7;
+    end = data.find(';', start);
+    if (end == std::string::npos) return;
+    std::istringstream marginStream(data.substr(start, end - start));
+    std::vector<int> m(4);
+    for (int i = 0; i < 4; i++) marginStream >> m[i];
+    boxModel->setMargin(m);
+
+    pos = data.find("border:");
+    if (pos == std::string::npos) return;
+    start = pos + 7;
+    end = data.find("px", start);
+    if (end == std::string::npos) return;
+    boxModel->setBorder(std::stoi(data.substr(start, end - start)));
+
+    pos = data.find("color:");
+    if (pos == std::string::npos) return;
+    start = pos + 6;
+    color->setCurrentColor(data[start]);
+
+    boxModel->setTextLength(innerText.length());
 }

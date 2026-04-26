@@ -19,6 +19,8 @@ public:
 
     void render() const override;
     Element* clone() const override;
+
+    std::string serialize() const override;
 };
 
 #endif

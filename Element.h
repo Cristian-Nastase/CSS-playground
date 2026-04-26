@@ -5,8 +5,9 @@
 #include <string>
 #include "Box.h"
 #include "Color.h"
+#include "Serializable.h"
 
-class Element {
+class Element : public Serializable {
 private:
     static int noElements;
 
@@ -54,6 +55,8 @@ public:
 
     virtual void render() const = 0;
     virtual Element* clone() const = 0;
+
+    void deserialize(const std::string &data) override;
 };
 
 #endif

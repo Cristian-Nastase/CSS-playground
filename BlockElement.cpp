@@ -22,12 +22,12 @@ BlockElement& BlockElement::operator=(const BlockElement &obj) {
 BlockElement::~BlockElement() { }
 
 std::istream& operator>>(std::istream &in, BlockElement &obj) {
-    in>>(Element&)(obj);
+    in>>static_cast<Element&>(obj);
     return  in;
 }
 
 std::ostream &operator<<(std::ostream &out, const BlockElement &obj) {
-    out<<(Element&)(obj);
+    out<<static_cast<const Element&>(obj);
     out<<"Display: block\n";
     return  out;
 }
@@ -88,4 +88,16 @@ void BlockElement::render() const {
     }
 
     std::cout<<"\n";
+}
+
+std::string BlockElement::serialize() const {
+    auto p = boxModel->getPadding();
+    auto m = boxModel->getMargin();
+    int b = boxModel->getBorder();
+
+    return "<div class=\"" + className + "\" id=\"" + idName + "\" "
+           "style=\"padding:" + std::to_string(p[0]) + " " + std::to_string(p[1]) + " " + std::to_string(p[2]) + " " + std::to_string(p[3]) + "; "
+           "margin:" + std::to_string(m[0]) + " " + std::to_string(m[1]) + " " + std::to_string(m[2]) + " " + std::to_string(m[3]) + "; "
+           "border:" + std::to_string(b) + "px solid; " + "color:" + std::string(1, color->getCurrentColor()) + "; " + " \">"
+           + innerText + "</div>";
 }

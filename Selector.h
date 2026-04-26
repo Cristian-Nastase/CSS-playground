@@ -51,6 +51,9 @@ public:
     std::vector<Element*> returnTargetedElements() const;
 
     void printElements() const;
+
+    void saveToFile(const std::string& filename) const;
+    void loadFromFile(const std::string& filename);
 };
 
 #endif

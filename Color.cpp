@@ -4,6 +4,8 @@
 #include <limits>
 #include "Color.h"
 
+#include "Exceptii.h"
+
 const std::map<char, std::string> Color::colorMap = {
     {'R', "\033[0;31m"},
     {'W', "\033[0;37m"},
@@ -54,7 +56,7 @@ void Color::setCurrentColor(char color) {
     if (!colorMap.count(color)) {
         std::cout<<"Not a registered color, defaults to white -> "<<color;
         this->currentColor = 'W';
-        return;
+        throw CuloareInvalidaException();
     }
 
     this->currentColor = color;

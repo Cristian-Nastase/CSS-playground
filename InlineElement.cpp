@@ -25,13 +25,12 @@ InlineElement& InlineElement::operator=(const InlineElement &obj) {
 InlineElement::~InlineElement() { }
 
 std::istream& operator>>(std::istream &in, InlineElement &obj) {
-    in>>(Element&)(obj);
-    std::cout<<"dwadawd";
+    in>>static_cast<Element&>(obj);
     return  in;
 }
 
 std::ostream &operator<<(std::ostream &out, const InlineElement &obj) {
-    out<<(Element&)(obj);
+    out<<static_cast<const Element&>(obj);
     out<<"Display: inline";
     return out;
 }
@@ -131,4 +130,16 @@ void InlineElement::printLine(int line) const {
 
 void InlineElement::setRendered(bool rendered) {
     this->alreadyRendered = rendered;
+}
+
+std::string InlineElement::serialize() const {
+    auto p = boxModel->getPadding();
+    auto m = boxModel->getMargin();
+    int b = boxModel->getBorder();
+
+    return "<span class=\"" + className + "\" id=\"" + idName + "\" "
+           "style=\"padding:" + std::to_string(p[0]) + " " + std::to_string(p[1]) + " " + std::to_string(p[2]) + " " + std::to_string(p[3]) + "; "
+           "margin:" + std::to_string(m[0]) + " " + std::to_string(m[1]) + " " + std::to_string(m[2]) + " " + std::to_string(m[3]) + "; "
+           "border:" + std::to_string(b) + "px solid; " + "color:" + std::string(1, color->getCurrentColor()) + "; " + " \">"
+           + innerText + "</span>";
 }
