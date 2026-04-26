@@ -13,6 +13,9 @@ Element::Element() : boxModel(new Box), color(new Color), id(noElements++) {
     idName = "N/A";
 
     isColored = true;
+    boxModel->setTextLength(innerText.length());
+
+    nextSibling = nullptr;
 }
 
 std::string Element::checkString(const std::string& text) {
@@ -31,11 +34,14 @@ std::string Element::checkString(const std::string& text) {
 }
 
 Element::Element(const std::string& innerText, const std::string& className, const std::string& idName, bool isColored) : boxModel(new Box), color(new Color), id(noElements++) {
-    this->innerText = checkString(innerText);
+    this->innerText = innerText;
     this->className = checkString(className);
     this->idName = checkString(idName);
 
     this->isColored = isColored;
+
+    boxModel->setTextLength(this->innerText.length());
+    nextSibling = nullptr;
 }
 
 Element::Element(const Element& obj) : boxModel(new Box(*obj.boxModel)), color(new Color(*obj.color)), id(noElements++) {
@@ -45,9 +51,8 @@ Element::Element(const Element& obj) : boxModel(new Box(*obj.boxModel)), color(n
 
     this->isColored = obj.isColored;
 
-    for (int i = 0; i < obj.children.size(); i++) {
-        this->children.push_back(obj.children[i]->clone());
-    }
+    boxModel->setTextLength(innerText.length());
+    nextSibling = nullptr;
 }
 
 Element& Element::operator=(const Element& obj) {
@@ -63,26 +68,15 @@ Element& Element::operator=(const Element& obj) {
 
     delete this->boxModel;
     this->boxModel = new Box(*obj.boxModel);
+    this->boxModel->setTextLength(innerText.length());
 
     delete this->color;
     this->color = new Color(*obj.color);
-
-    for (int i = 0; i < children.size(); i++)
-        delete children[i];
-
-    this->children.clear();
-
-    for (int i = 0; i < obj.children.size(); i++) {
-        this->children.push_back(obj.children[i]->clone());
-    }
 
     return *this;
 }
 
 Element::~Element() {
-    for (int i = 0; i < children.size(); i++)
-        delete children[i];
-
     delete boxModel;
     delete color;
 }
@@ -97,6 +91,10 @@ std::string Element::getIdName() const {
 
 int Element::getId() const {
     return this->id;
+}
+
+Element* Element::getNextSibling() const {
+    return this->nextSibling;
 }
 
 void Element::setClassName(const std::string& string) {
@@ -125,6 +123,14 @@ void Element::setColor(const Color* color) {
     this->color = new Color(*color);
 }
 
+void Element::setNextSibling(Element *element) {
+    if (element == nullptr) {
+        return;
+    }
+
+    this->nextSibling = element;
+}
+
 std::string Element::readString(std::istream &in, const std::string& textToPrint) {
     std::string temp;
     std::cout<<textToPrint;
@@ -134,8 +140,6 @@ std::string Element::readString(std::istream &in, const std::string& textToPrint
 }
 
 std::istream& operator>>(std::istream& in, Element& obj) {
-    in.ignore(1000, '\n');
-
     obj.innerText = Element::readString(in,"Enter a text: ");
     obj.className = Element::readString(in, "Enter a class name: ");
     obj.idName = Element::readString(in, "Enter an id: ");
@@ -161,15 +165,6 @@ std::ostream& operator<<(std::ostream &out, const Element &obj) {
     return out;
 }
 
-void Element::addChild(const Element& obj) {
-    children.push_back(obj.clone());
-}
-
-void Element::removeChild(int index) {
-    delete children[index];
-    children.erase(children.begin() + index);
-}
-
 void Element::printMarginLine() const {
     for (int j = 0; j < boxModel->getWidth(); j++) std::cout<<" ";
 }
@@ -188,8 +183,6 @@ void Element::printBorderLine() const {
     for (j = width - m_left - m_right; j != 0; j--) std::cout << "|";
 
     for (j = m_right; j != 0; j--) std::cout<<" ";
-
-    std::cout<<"\n";
 }
 
 void Element::printPaddingLine() const {
@@ -200,6 +193,7 @@ void Element::printPaddingLine() const {
     int m_right = margin[1];
 
     int width = boxModel->getWidth();
+
     int contentWidth = width - m_left - m_right - 2 * boxModel->getBorder();
 
     for (j = m_left; j != 0; j--) std::cout << " ";

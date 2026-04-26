@@ -13,7 +13,7 @@ private:
     static std::string readString(std::istream& in, const std::string& textToPrint);
     static std::string checkString(const std::string& text);
 protected:
-    std::vector<Element*> children;
+    Element* nextSibling;
 
     std::string innerText;
     std::string className;
@@ -41,17 +41,16 @@ public:
     std::string getClassName() const;
     std::string getIdName() const;
     int getId() const;
+    Element* getNextSibling() const;
 
     void setClassName(const std::string& string);
     void setIdName(const std::string& string);
     void setColor(const Color* color);
     void setBox(const Box* box);
+    void setNextSibling(Element* element);
 
     friend std::istream& operator>>(std::istream& in, Element& obj);
     friend std::ostream& operator<<(std::ostream& out, const Element& obj);
-
-    void addChild(const Element& obj);
-    void removeChild(int index);
 
     virtual void render() const = 0;
     virtual Element* clone() const = 0;

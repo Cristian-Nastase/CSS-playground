@@ -22,6 +22,8 @@ private:
 
     bool checkClassName(const Element* element) const;
     bool checkIdName(const Element* element) const;
+
+    void changeSiblings() const;
 public:
     Selector();
     Selector(const std::string& selectorString);

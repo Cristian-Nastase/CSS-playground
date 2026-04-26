@@ -160,6 +160,12 @@ std::ostream& operator<<(std::ostream &out, const Selector &obj) {
     return out;
 }
 
+void Selector::changeSiblings() const {
+    for (int i = 0; i < elements.size() - 1; i++) {
+        elements[i]->setNextSibling(elements[i+1]);
+    }
+}
+
 // 0 - block
 // 1 - inline
 void Selector::createElement(int elementType) {
@@ -178,6 +184,8 @@ void Selector::createElement(int elementType) {
 
     this->elements.push_back(e);
     isEmpty = false;
+
+    changeSiblings();
 }
 
 void Selector::listElements() const {

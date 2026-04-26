@@ -132,6 +132,7 @@ void Menu::createElementsMenu() {
         std::cout<<"\nWhat type of element do you want to create? ->";
         std::cout<<"\n0. Block";
         std::cout<<"\n1. Inline\n";
+        std::cout<<"-> ";
         int option;
         std::cin>>option;
         std::cin.ignore();

@@ -69,6 +69,7 @@ void BlockElement::render() const {
     }
 
     printContent();
+    std::cout<<"\n";
 
     // bottom of content
     for (j = 0; j < p_bottom; j++) {
