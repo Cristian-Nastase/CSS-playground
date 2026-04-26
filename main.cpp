@@ -27,7 +27,9 @@ public:
     void playgroundMenu();
     void descriptionMenu();
     void removeElementsMenu();
+    void createOrDuplicateMenu();
     void createElementsMenu();
+    void duplicateMenu();
     void elementsMenu();
     void valueMenu();
     void selectorMenu();
@@ -127,6 +129,32 @@ void Menu::removeElementsMenu() {
     }
 }
 
+void Menu::createOrDuplicateMenu() {
+    while (true) {
+        std::cout<<"\n~ Elements ~ \n";
+        std::cout<<"0. Exit\n";
+        std::cout<<"1. Create new element\n";
+        std::cout<<"2. Duplicate already existing element\n";
+
+        std::cout<<"\n -> ";
+        int option;
+        std::cin>>option;
+
+        switch (option) {
+            case 0:
+                return;
+            case 1:
+                createElementsMenu();
+                break;
+            case 2:
+                duplicateMenu();
+                break;
+            default:
+                std::cout<<"Invalid option, try again\n";
+        }
+    }
+}
+
 void Menu::createElementsMenu() {
     while (true) {
         std::cout<<"\nWhat type of element do you want to create? ->";
@@ -147,6 +175,29 @@ void Menu::createElementsMenu() {
     }
 }
 
+void Menu::duplicateMenu() {
+    selectorObj.listElements();
+
+    if (selectorObj.getVectorSize() == 0) {
+        return;
+    }
+
+    while (true) {
+        std::cout<<"\nWhich element do you want to clone? -> ";
+        int option;
+        std::cin>>option;
+        std::cin.ignore();
+
+        if (!option || option < 0 || option > selectorObj.getVectorSize()) {
+            std::cout<<"Not a valid option, try again.\n";
+            continue;
+        }
+
+        selectorObj.copyElement(option - 1);
+        return;
+    }
+}
+
 void Menu::elementsMenu() {
     while (true) {
         std::cout<<"\n~ Elements ~ \n";
@@ -163,7 +214,7 @@ void Menu::elementsMenu() {
             case 0:
                 return;
             case 1:
-                createElementsMenu();
+                createOrDuplicateMenu();
                 break;
             case 2:
                 selectorObj.listElements();

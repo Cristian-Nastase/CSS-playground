@@ -200,9 +200,13 @@ void Selector::listElements() const {
     }
 }
 
-void Selector::addElement(Element* element) {
+void Selector::copyElement(int index) {
+    Element* element = elements[index];
+
     Element* copy = element->clone();
     this->elements.push_back(copy);
+
+    changeSiblings();
 }
 
 void Selector::removeElement(int index) {

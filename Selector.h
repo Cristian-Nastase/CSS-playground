@@ -42,7 +42,8 @@ public:
 
     void createElement(int elementType);
     void listElements() const;
-    void addElement(Element* element);
+
+    void copyElement(int index);
     void removeElement(int index);
 
     void verifyType();
