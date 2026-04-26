@@ -28,6 +28,7 @@ std::istream& operator>>(std::istream &in, BlockElement &obj) {
 
 std::ostream &operator<<(std::ostream &out, const BlockElement &obj) {
     out<<(Element&)(obj);
+    out<<"Display: block\n";
     return  out;
 }
 
@@ -36,5 +37,54 @@ Element *BlockElement::clone() const {
 }
 
 void BlockElement::render() const {
-    return;
+    int j;
+
+    auto margin = boxModel->getMargin();
+    auto padding = boxModel->getPadding();
+
+    int m_top = margin[0];
+    int m_bottom = margin[2];
+
+    int p_top = padding[0];
+    int p_bottom = padding[2];
+
+    int border = boxModel->getBorder();
+
+    std::cout<<"\n";
+
+    // on top of content
+    for (j = 0; j < m_top; j++) {
+        printMarginLine();
+        std::cout<<"\n";
+    }
+
+    for (j = 0; j < border; j++) {
+        printBorderLine();
+        std::cout<<"\n";
+    }
+
+    for (j = 0; j < p_top; j++) {
+        printPaddingLine();
+        std::cout<<"\n";
+    }
+
+    printContent();
+
+    // bottom of content
+    for (j = 0; j < p_bottom; j++) {
+        printPaddingLine();
+        std::cout<<"\n";
+    }
+
+    for (j = 0; j < border; j++) {
+        printBorderLine();
+        std::cout<<"\n";
+    }
+
+    for (j = 0; j < m_bottom; j++) {
+        printMarginLine();
+        std::cout<<"\n";
+    }
+
+    std::cout<<"\n";
 }

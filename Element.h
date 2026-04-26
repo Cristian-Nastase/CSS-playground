@@ -25,6 +25,11 @@ protected:
     Color* color;
 
     const int id;
+
+    void printMarginLine() const;
+    void printBorderLine() const;
+    void printPaddingLine() const;
+    void printContent() const;
 public:
     Element();
     Element(const std::string& innerText,const std::string& className,const std::string& idName, bool isColored);

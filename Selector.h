@@ -38,7 +38,7 @@ public:
     friend std::istream& operator>>(std::istream& in, Selector& obj);
     friend std::ostream& operator<<(std::ostream& out, const Selector& obj);
 
-    void createElement();
+    void createElement(int elementType);
     void listElements() const;
     void addElement(Element* element);
     void removeElement(int index);

@@ -23,12 +23,14 @@ InlineElement::~InlineElement() { }
 
 std::istream& operator>>(std::istream &in, InlineElement &obj) {
     in>>(Element&)(obj);
+    std::cout<<"dwadawd";
     return  in;
 }
 
 std::ostream &operator<<(std::ostream &out, const InlineElement &obj) {
     out<<(Element&)(obj);
-    return  out;
+    out<<"Display: inline";
+    return out;
 }
 
 Element *InlineElement::clone() const {

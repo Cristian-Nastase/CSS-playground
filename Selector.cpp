@@ -4,6 +4,7 @@
 
 #include "Selector.h"
 
+#include "BlockElement.h"
 #include "InlineElement.h"
 
 int Selector::noSelector = 0;
@@ -159,9 +160,20 @@ std::ostream& operator<<(std::ostream &out, const Selector &obj) {
     return out;
 }
 
-void Selector::createElement() {
+// 0 - block
+// 1 - inline
+void Selector::createElement(int elementType) {
     std::cout<<"\n[Element "<<this->elements.size() + 1<<"]: \n\n";
-    Element* e = new InlineElement;
+
+    Element* e;
+
+    if (elementType == 0) {
+        e = new BlockElement;
+    }
+    else {
+        e = new InlineElement;
+    }
+
     std::cin>>*e;
 
     this->elements.push_back(e);

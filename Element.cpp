@@ -169,3 +169,68 @@ void Element::removeChild(int index) {
     delete children[index];
     children.erase(children.begin() + index);
 }
+
+void Element::printMarginLine() const {
+    for (int j = 0; j < boxModel->getWidth(); j++) std::cout<<" ";
+}
+
+void Element::printBorderLine() const {
+    int i, j;
+
+    int width = boxModel->getWidth();
+
+    auto margin = boxModel->getMargin();
+    int m_left = margin[3];
+    int m_right = margin[1];
+
+    for (j = m_left; j != 0; j--) std::cout<<" ";
+
+    for (j = width - m_left - m_right; j != 0; j--) std::cout << "|";
+
+    for (j = m_right; j != 0; j--) std::cout<<" ";
+
+    std::cout<<"\n";
+}
+
+void Element::printPaddingLine() const {
+    int i, j;
+
+    auto margin = boxModel->getMargin();
+    int m_left = margin[3];
+    int m_right = margin[1];
+
+    int width = boxModel->getWidth();
+    int contentWidth = width - m_left - m_right - 2 * boxModel->getBorder();
+
+    for (j = m_left; j != 0; j--) std::cout << " ";
+
+    for (j = boxModel->getBorder(); j != 0; j--) std::cout << "|";
+
+    for (j = contentWidth; j != 0; j--) std::cout << " ";
+
+    for (j = boxModel->getBorder(); j != 0; j--) std::cout << "|";
+
+    for (j = m_right; j != 0; j--) std::cout << " ";
+}
+
+void Element::printContent() const {
+    int j;
+
+    auto margin = boxModel->getMargin();
+    int m_left = margin[3];
+    int m_right = margin[1];
+
+    auto padding = boxModel->getPadding();
+    int p_left = padding[3];
+    int p_right = padding[1];
+
+    for (j = m_left; j != 0; j--) std::cout << " ";
+    for (j = boxModel->getBorder(); j != 0; j--) std::cout << "|";
+    for (j = p_left; j != 0; j--) std::cout << " ";
+
+    color->printColored(innerText);
+
+    for (j = p_right; j != 0; j--) std::cout << " ";
+    for (j = boxModel->getBorder(); j != 0; j--) std::cout << "|";
+    for (j = m_right; j != 0; j--) std::cout << " ";
+}
